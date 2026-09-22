@@ -10,9 +10,9 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 app.use(express.json());
 
 // Initialize Firebase server instance for SSR OpenGraph metadata fetching
-let db: any = null;
+let db = null;
 try {
-  let firebaseConfig: any = null;
+  let firebaseConfig = null;
   const configPath = path.join(process.cwd(), 'firebase-applet-config.json');
   if (fs.existsSync(configPath)) {
     firebaseConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
@@ -56,14 +56,15 @@ app.post('/api/cloudinary/sign', (req, res) => {
       uploadPreset,
       uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
     });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || 'Cloudinary signature generation failed' });
+  } catch (err) {
+    res.status(500).json({ error: err?.message || 'Cloudinary signature generation failed' });
   }
 });
 
 // Helper to escape HTML attributes for safe meta tag injection
-function escapeHtml(str: string): string {
-  return str
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
@@ -72,7 +73,7 @@ function escapeHtml(str: string): string {
 }
 
 // Transform Cloudinary image for high-speed WebP social cards
-function formatCloudinaryCardImage(url: string): string {
+function formatCloudinaryCardImage(url) {
   if (!url) return 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&auto=format&fit=crop&q=80';
   if (url.includes('cloudinary.com')) {
     return url.replace('/upload/', '/upload/w_1200,h_630,c_fill,q_auto,f_auto/');
@@ -81,7 +82,7 @@ function formatCloudinaryCardImage(url: string): string {
 }
 
 // Dynamic OpenGraph / SSR injector for store and product links
-async function injectDynamicMetadata(html: string, req: express.Request): Promise<string> {
+async function injectDynamicMetadata(html, req) {
   const host = req.get('host') || 'dokani.onrender.com';
   const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
   const fullUrl = `${protocol}://${host}${req.originalUrl}`;
@@ -101,7 +102,7 @@ async function injectDynamicMetadata(html: string, req: express.Request): Promis
 
       if (productSnap.exists()) {
         const prodData = productSnap.data();
-        title = `${prodData.title} – ৳${prodData.price.toLocaleString('en-BD')} | ${prodData.vendorName || 'Dokani'}`;
+        title = `${prodData.title} – ৳${Number(prodData.price || 0).toLocaleString('en-BD')} | ${prodData.vendorName || 'Dokani'}`;
         description = prodData.description
           ? prodData.description.slice(0, 160)
           : `Order ${prodData.title} online with Cash on Delivery in Bangladesh.`;

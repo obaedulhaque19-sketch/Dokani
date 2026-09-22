@@ -17,10 +17,9 @@ When creating a new service on Render:
 
 ### How It Operates:
 - **Build (`npm run build`):**
-  1. Compiles frontend assets to `dist/`.
-  2. Compiles and bundles `server.ts` into a self-contained CommonJS Node server (`dist/server.cjs`).
+  - Runs `vite build` to compile the frontend assets into `dist/` in under 1 second. No bundlers or esbuild required!
 - **Start (`npm start`):**
-  - Runs `node dist/server.cjs` listening on `process.env.PORT || 3000` on host `0.0.0.0`.
+  - Runs `node server.js` directly using native Node.js ESM, listening on `process.env.PORT || 3000` on host `0.0.0.0`.
 - **Health Check Path:**
   - Set Render health check path to: `/api/health`
 
