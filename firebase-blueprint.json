@@ -1,0 +1,155 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User account profile and role information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9._%+-]+@gmail\\.com$" },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "enum": ["admin", "vendor", "customer"] },
+        "whatsapp": { "type": "string", "maxLength": 20 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "email", "role", "createdAt"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Admin authorization entry",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "enum": ["admin"] },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["email", "role"]
+    },
+    "Vendor": {
+      "title": "Vendor",
+      "description": "Store details and vendor information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "ownerEmail": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9._%+-]+@gmail\\.com$" },
+        "ownerUid": { "type": "string", "maxLength": 128 },
+        "storeName": { "type": "string", "maxLength": 100 },
+        "category": { "type": "string", "maxLength": 50 },
+        "whatsapp": { "type": "string", "maxLength": 20 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "district": { "type": "string", "maxLength": 50 },
+        "isDemo": { "type": "boolean" },
+        "isApproved": { "type": "boolean" },
+        "isBlocked": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "ownerEmail", "storeName", "category", "whatsapp", "isDemo", "isApproved"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "E-commerce product catalog listing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "vendorId": { "type": "string", "maxLength": 128 },
+        "storeName": { "type": "string", "maxLength": 100 },
+        "title": { "type": "string", "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "category": { "type": "string", "maxLength": 50 },
+        "price": { "type": "number" },
+        "discountPrice": { "type": "number" },
+        "stock": { "type": "number" },
+        "primaryImage": { "type": "string", "maxLength": 500 },
+        "isDemo": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["active", "draft", "archived"] },
+        "metaTitle": { "type": "string", "maxLength": 100 },
+        "metaDescription": { "type": "string", "maxLength": 300 },
+        "altText": { "type": "string", "maxLength": 150 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "vendorId", "title", "category", "price", "primaryImage", "isDemo", "status"]
+    },
+    "Lead": {
+      "title": "Lead",
+      "description": "Early customer checkout lead record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "fullName": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9._%+-]+@gmail\\.com$" },
+        "whatsapp": { "type": "string", "maxLength": 20, "pattern": "^(\\+8801|01)[3-9]\\d{8}$" },
+        "cartItemsCount": { "type": "number" },
+        "cartTotal": { "type": "number" },
+        "status": { "type": "string", "enum": ["captured", "converted", "abandoned"] },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "fullName", "email", "whatsapp", "status", "createdAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer purchase order",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "customerEmail": { "type": "string", "maxLength": 128 },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "whatsapp": { "type": "string", "maxLength": 20 },
+        "address": { "type": "string", "maxLength": 300 },
+        "city": { "type": "string", "maxLength": 50 },
+        "total": { "type": "number" },
+        "paymentMethod": { "type": "string", "enum": ["cod", "bkash", "nagad"] },
+        "status": { "type": "string", "enum": ["pending", "processing", "completed", "cancelled"] },
+        "isDemo": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "customerEmail", "customerName", "whatsapp", "total", "paymentMethod", "status", "isDemo", "createdAt"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Customer product review and rating",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "productId": { "type": "string", "maxLength": 128 },
+        "vendorId": { "type": "string", "maxLength": 128 },
+        "customerEmail": { "type": "string", "maxLength": 128 },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "rating": { "type": "number" },
+        "comment": { "type": "string", "maxLength": 1000 },
+        "isVerifiedBuyer": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "productId", "customerEmail", "customerName", "rating", "comment", "isVerifiedBuyer", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "User" },
+      "description": "User profile collection"
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "Admin" },
+      "description": "System admin verification documents"
+    },
+    "/vendors/{vendorId}": {
+      "schema": { "$ref": "Vendor" },
+      "description": "Store and seller records"
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "Product" },
+      "description": "Product catalog"
+    },
+    "/leads/{leadId}": {
+      "schema": { "$ref": "Lead" },
+      "description": "Customer pre-checkout leads"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "Order" },
+      "description": "Multi-vendor customer orders"
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "Review" },
+      "description": "Product ratings and reviews"
+    }
+  }
+}

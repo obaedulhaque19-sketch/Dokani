@@ -1,0 +1,130 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'obaedulhaque19@gmail.com'
+      );
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['id', 'email', 'role', 'createdAt']) &&
+        data.email is string && data.email.size() <= 128 &&
+        data.role in ['admin', 'vendor', 'customer'];
+    }
+
+    function isValidProduct(data) {
+      return data.keys().hasAll(['id', 'vendorId', 'title', 'category', 'price', 'primaryImage', 'isDemo', 'status']) &&
+        data.title is string && data.title.size() <= 200 &&
+        data.category is string && data.category.size() <= 50 &&
+        data.price is number && data.price >= 0;
+    }
+
+    function isValidVendor(data) {
+      return data.keys().hasAll(['id', 'ownerEmail', 'storeName', 'category', 'whatsapp', 'isDemo', 'isApproved']) &&
+        data.storeName is string && data.storeName.size() <= 100 &&
+        data.category is string && data.category.size() <= 50;
+    }
+
+    function isValidLead(data) {
+      return data.keys().hasAll(['id', 'fullName', 'email', 'whatsapp', 'status', 'createdAt']) &&
+        data.fullName is string && data.fullName.size() <= 100 &&
+        data.email is string && data.email.size() <= 128 &&
+        data.whatsapp is string && data.whatsapp.size() <= 20;
+    }
+
+    function isValidOrder(data) {
+      return data.keys().hasAll(['id', 'customerEmail', 'customerName', 'whatsapp', 'total', 'paymentMethod', 'status', 'isDemo', 'createdAt']) &&
+        data.customerName is string && data.customerName.size() <= 100 &&
+        data.customerEmail is string && data.customerEmail.size() <= 128 &&
+        data.whatsapp is string && data.whatsapp.size() <= 20 &&
+        data.total is number && data.total >= 0;
+    }
+
+    function isValidReview(data) {
+      return data.keys().hasAll(['id', 'productId', 'customerEmail', 'customerName', 'rating', 'comment', 'isVerifiedBuyer', 'createdAt']) &&
+        data.customerName is string && data.customerName.size() <= 100 &&
+        data.customerEmail is string && data.customerEmail.size() <= 128 &&
+        data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+        data.comment is string && data.comment.size() <= 1000;
+    }
+
+    // Collection Rules
+
+    match /users/{userId} {
+      allow read: if isValidId(userId);
+      allow list: if isAdmin();
+      allow create: if isValidId(userId) && isValidUser(incoming());
+      allow update: if isValidId(userId) && (isAdmin() || (isSignedIn() && request.auth.uid == userId) || isValidUser(incoming()));
+      allow delete: if isValidId(userId) && isAdmin();
+    }
+
+    match /admins/{adminId} {
+      allow read: if isValidId(adminId);
+      allow write: if isValidId(adminId) && isAdmin();
+    }
+
+    match /vendors/{vendorId} {
+      allow read: if isValidId(vendorId);
+      allow create: if isValidId(vendorId) && (isAdmin() || isValidVendor(incoming()));
+      allow update: if isValidId(vendorId) && (isAdmin() || isValidVendor(incoming()));
+      allow delete: if isValidId(vendorId) && isAdmin();
+    }
+
+    match /products/{productId} {
+      allow read: if isValidId(productId);
+      allow create: if isValidId(productId) && (isAdmin() || (isSignedIn() && isValidProduct(incoming())) || (incoming().isDemo == true && isValidProduct(incoming())));
+      allow update: if isValidId(productId) && (isAdmin() || (isSignedIn() && isValidProduct(incoming())) || (incoming().isDemo == true && isValidProduct(incoming())));
+      allow delete: if isValidId(productId) && (isAdmin() || isSignedIn());
+    }
+
+    match /leads/{leadId} {
+      allow create: if isValidId(leadId) && isValidLead(incoming());
+      allow update: if isValidId(leadId) && (isAdmin() || isValidLead(incoming()));
+      allow read, delete: if isValidId(leadId) && (isAdmin() || true);
+    }
+
+    match /orders/{orderId} {
+      allow create: if isValidId(orderId) && isValidOrder(incoming());
+      allow read: if isValidId(orderId) && (isAdmin() || (isSignedIn() && (resource.data.customerEmail == request.auth.token.email || resource.data.ownerUid == request.auth.uid)));
+      allow update: if isValidId(orderId) && (isAdmin() || isSignedIn());
+      allow delete: if isValidId(orderId) && isAdmin();
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if isValidId(reviewId);
+      allow create: if isValidId(reviewId) && isValidReview(incoming());
+      allow update, delete: if isValidId(reviewId) && isAdmin();
+    }
+
+    // Health check test path for getDocFromServer connection test
+    match /test/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}

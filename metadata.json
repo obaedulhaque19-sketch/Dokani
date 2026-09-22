@@ -1,0 +1,6 @@
+{
+  "name": "Dokani",
+  "description": "Multi-Vendor E-Commerce Platform for Bangladesh with zero-friction checkout, vendor management, and automated SEO.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
